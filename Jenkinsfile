@@ -1,28 +1,30 @@
 pipeline {
   agent any
   stages {
-     stage('Build oms-cus-sys') {
+    stage('Unit Test') { 
       steps {
-      
-          echo '########## build starting ##########'
-          bat 'mvn clean install'
-          echo '########## build success ##########'
-      }
-    } 
-     stage('Test oms-cus-sys') {
-      steps {
-      
-          echo '########## test starting ##########'
-          bat "mvn test"
-          echo '########## test success ##########'
+        sh 'mvn clean test'
       }
     }
-     stage('Deploy oms-cus-sys') {
+    stage('Deploy Standalone') { 
       steps {
-      
-          echo '########## deploy starting ##########'
-          bat 'mvn package deploy -DmuleDeploy'
-          echo '########## deploy success ##########'
+        sh 'mvn deploy -P standalone'
+      }
+    }
+    stage('Deploy ARM') { 
+      environment {
+        ANYPOINT_CREDENTIALS = credentials('anypoint.credentials') 
+      }
+      steps {
+        sh 'mvn deploy -P arm -Darm.target.name=local-4.4.0-ee -Danypoint.username=${ANYPOINT_CREDENTIALS_USR}  -Danypoint.password=${ANYPOINT_CREDENTIALS_PSW}' 
+      }
+    }
+    stage('Deploy CloudHub') { 
+      environment {
+        ANYPOINT_CREDENTIALS = credentials('anypoint.credentials')
+      }
+      steps {
+        sh 'mvn deploy -P cloudhub -Dmule.version=4.4.0 -Danypoint.username=${ANYPOINT_CREDENTIALS_USR} -Danypoint.password=${ANYPOINT_CREDENTIALS_PSW}' 
       }
     }
   }
