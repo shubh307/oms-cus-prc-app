@@ -16,7 +16,7 @@ pipeline {
         ANYPOINT_CREDENTIALS = credentials('anypoint.credentials') 
       }
       steps {
-        bat 'mvn deploy -P arm -Darm.target.name=local-4.4.0-ee -Danypoint.username='API1909'  -Danypoint.password='Shubh_Sindhi@69.5%' 
+        bat 'mvn deploy -P arm -Darm.target.name=local-4.4.0-ee -Danypoint.username="API1909"  -Danypoint.password="Shubh_Sindhi@69.5%" 
       }
     }
     stage('Deploy CloudHub') { 
@@ -24,7 +24,7 @@ pipeline {
         ANYPOINT_CREDENTIALS = credentials('anypoint.credentials')
       }
       steps {
-        bat 'mvn deploy -P cloudhub -Dmule.version=4.4.0 -Danypoint.username='API1909' -Danypoint.password='Shubh_Sindhi@69.5%' 
+        bat 'mvn deploy -P cloudhub -Dmule.version=4.4.0 -Danypoint.username="API1909" -Danypoint.password="Shubh_Sindhi@69.5%"
       }
     }
   }
