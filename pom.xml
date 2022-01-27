@@ -33,13 +33,6 @@
 				<version>${mule.maven.plugin.version}</version>
 				<extensions>true</extensions>
 				<configuration>
-					<classifier>mule-application</classifier>
-					<sharedLibraries>
-						<sharedLibrary>
-							<groupId>mysql</groupId>
-							<artifactId>mysql-connector-java</artifactId>
-						</sharedLibrary>
-					</sharedLibraries>
 					<cloudHubDeployment>
 						<uri>https://anypoint.mulesoft.com</uri>
 						<muleVersion>4.4.0</muleVersion>
@@ -48,9 +41,16 @@
 						<applicationName>omscustomersysapp</applicationName>
 						<environment>Sandbox</environment>
 						<workers>1</workers>
-						<workerType>MICRO</workerType>
+						<workerType>Micro</workerType>
 						<objectStoreV2>true</objectStoreV2>
 					</cloudHubDeployment>
+					<sharedLibraries>
+						<sharedLibrary>
+							<groupId>mysql</groupId>
+							<artifactId>mysql-connector-java</artifactId>
+						</sharedLibrary>
+					</sharedLibraries>
+
 				</configuration>
 			</plugin>
 			<plugin>
