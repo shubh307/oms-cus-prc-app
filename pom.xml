@@ -45,7 +45,7 @@
 						<muleVersion>4.4.0</muleVersion>
 						<username>API1909E</username>
 						<password>Shubh_Sindhi@69.5%</password>
-						<applicationName>oms-customer-sys-app</applicationName>
+						<applicationName>omscustomersysapp</applicationName>
 						<environment>Sandbox</environment>
 						<workers>1</workers>
 						<workerType>micro</workerType>
