@@ -1,0 +1,22 @@
+errorCodeMessage:
+  badRequest:
+   code: "400"
+   description: "bad request"
+  notFound:
+   code: "404"
+   description: "not found"
+  methodNotAllowed:
+   code: "405"
+   description: "method not allowed"
+  notAcceptable:
+   code: "406"
+   description: "not acceptable"
+  unsupportedMediaType:
+   code: "415"
+   description: "unsupported media type"
+  notImplemented:
+   code: "501"
+   description: "not implemented"
+  serviceUnavailable:
+   code: "503"
+   description: "service unavailable"

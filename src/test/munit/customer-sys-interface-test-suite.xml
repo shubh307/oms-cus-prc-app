@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="customer-sys-interface-test-suite.xml" />
+	<munit:test name="customer-sys-interface-test-suite-delete:\sysCustomers\(customerId):oms-customer-sys-api-configTest" doc:id="10bc9b80-5da7-4d07-8ad5-96c6de3c801f" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="8bad78b2-96cc-4412-9ff6-64b87e0c2ebc" processor="db:delete">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="f96fedad-9e27-467f-95b0-8a7086a9be63" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[1]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to delete:\sysCustomers\(customerId):oms-customer-sys-api-config" doc:id="bdc8d046-7dd2-4c63-b8e0-d24d7f96806e" name="delete:\sysCustomers\(customerId):oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7025a80f-8717-4f7e-9a41-6459b35775a9" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-get:\sysCustomers\(customerId):oms-customer-sys-api-configTest" doc:id="9906b571-069d-4c34-ba3e-f92284ea4123" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="b0987f57-5a8b-464a-b1a9-66c8d5cc4915" processor="db:select">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="c1aefbd2-88b9-4f7b-8e9c-579bd6284841" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value='#[[{&#10;     "customerId" : "shubh307",&#10;     "firstName": "John",&#10;     "lastName": "Smith",&#10;     "email": "T6f6t7q8xuFgHjZIePYaG7uNPQ+RM8uXDFnUrrChGNc=",&#10;     "age": 22,&#10;      "streetAddress": "21 2nd Street",&#10;      "city": "New York",&#10;      "state": "NY",&#10;      "postalCode": "10021",&#10;      "homeNumber": 1234567890,&#10;      "faxNumber": 1234567890&#10;}]]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to get:\sysCustomers\(customerId):oms-customer-sys-api-config" doc:id="8acaa223-5ab5-4e56-a4d3-2fff9e7cb515" name="get:\sysCustomers\(customerId):oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="551c26ae-dcf0-491d-8cc3-cfa680ee658f" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-patch:\sysCustomers\(customerId):application\json:oms-customer-sys-api-configTest" doc:id="818a364a-b909-4d95-8781-837a9bee4ca4" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="73d465cb-4600-47cc-aac6-2a48d07d4fcc" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="9c80dbbd-943c-4694-9749-007138dc3511" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[{&#10;"affectedRows": 1&#10;}]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to patch:\sysCustomers\(customerId):application\json:oms-customer-sys-api-config" doc:id="1bd434af-efec-493b-81f5-0b5e724edd05" name="patch:\sysCustomers\(customerId):application\json:oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="1939c3b4-ecf7-456d-af44-89e1f17b9390" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-post:\sysCustomers:application\json:oms-customer-sys-api-configTest" doc:id="2b3b7b63-22ba-48dc-a04e-d0864e8fe58a" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="4fa6c696-8048-442e-8e17-aa78aad1b8ad" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="37588be1-0cb3-4efc-9470-0b3018d4e712" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#["org.mule.extension.db.api.StatementResult@40bd1ee6"]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to post:\sysCustomers:application\json:oms-customer-sys-api-config" doc:id="1b6b564b-c2b5-4d41-a2b2-221b88f597ac" name="post:\sysCustomers:application\json:oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="6096f72e-ca2b-494b-9cef-325479f866fe" is="#[MunitTools::notNullValue()]" expression="#[payload]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-post:\customerMail:oms-customer-sys-api-configTest" doc:id="6160082d-a676-4fe8-b096-2bc526c038e5" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="cd0b4289-c1c6-4927-b2e9-8bae1b02fcc3" >
+				<munit:payload value='#[&#10;{&#10;"address": "shgcvahg"&#10;}&#10;]' />
+				<munit:attributes value='#[&#10;{&#10;"headers":&#10;{&#10;"customerId": "bajdhas",&#10;"name": "nscv",&#10;"email": "shubh.307@gmail.com",&#10;"age": 22,&#10;"homeNumber": 124352554353,&#10;"faxNumber": 5432362573&#10;},&#10;"queryParams":&#10;{&#10;"types": "hsjahcukskc",&#10;"message": "jhdcgsdjc",&#10;"email": "shubh.307@gmail.com"&#10;}&#10;}&#10;]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\customerMail:oms-customer-sys-api-config" doc:id="8d99a1ce-08f5-4b3c-a358-344a507001ad" name="post:\customerMail:oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8899533c-3b75-440d-9318-ffd7edc14ad5" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-post:\errorMail:oms-customer-sys-api-configTest" doc:id="fa2f2c6a-75ae-48d6-a206-e956b156f547" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="ab8193d9-283a-4f88-9901-4df8a470f1d4">
+				<munit:payload value='#[&#10;{&#10;	"errorField": 404,&#10;	"errorDescription": "OMS:CUSTOMER_ALREADY_EXISTS",&#10;	"actionItem": "Customer Id already registered"&#10;}&#10;]' />
+				<munit:attributes value='#[&#10;"queryParams":&#10;{&#10;"types": "hsjahcukskc",&#10;"email": "shubh.307@gmail.com"&#10;}&#10;]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\errorMail:oms-customer-sys-api-config" doc:id="f52c2c4e-ad19-4140-b046-0e114dea0615" name="post:\errorMail:oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="1b8b9a07-f791-4aef-b6fd-33904e576ea2" expression="#[payload]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-post:\orderMail:oms-customer-sys-api-configTest" doc:id="ff1bfa08-7344-4494-9f4e-c3131a335038" description="Test">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="3ac4fc1f-5adb-466b-b1fb-c648ec39ee3a">
+				<munit:payload value='#[&#10;{&#10;"DeliveryAddress": "shdnvc",&#10;"BillingAddress": "hshc"&#10;}&#10;]' />
+				<munit:attributes value='#[&#10;{&#10;"headers":&#10;{&#10;	quantity : 1,&#10;	orderId : "aghsdx",&#10;	totalPrice : 564,&#10;	price : 6751,&#10;	customerId : "bjxhb",&#10;	name : "hhbxja",&#10;	orderStatus : "hhbxja",&#10;	productName : "hhbxja"&#10;},&#10;"queryParams":&#10;{&#10;"types": "hsjahcukskc",&#10;"message": "hhbxja",&#10;"email": "shubh.307@gmail.com"&#10;}&#10;}&#10;]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to post:\orderMail:oms-customer-sys-api-config" doc:id="15b831cd-9c75-4fff-8c98-a71f748e04ea" name="post:\orderMail:oms-customer-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="e3160760-d9f2-4fbb-b204-6bbc904e5490" expression="#[payload]" is="#[MunitTools::notNullValue()]" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-oms-customer-sys-api-mainTest" doc:id="94b9c3cc-86e3-4408-b4b4-07daf6a85da0" description="Test" expectedErrorType="APIKIT:BAD_REQUEST">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="11cf629e-0d1b-4379-b093-5d6549dc5425" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="oms-customer-sys-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to oms-customer-sys-api-main" doc:id="ee3e06f7-5d03-43bb-9887-a41c9929f50c" name="oms-customer-sys-api-main"/>
+		</munit:execution>
+		<munit:validation>
+			<logger level="INFO" doc:name="Logger" doc:id="7c790034-29cc-4fdd-b108-94962b4ec697" message="output #payload"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-oms-customer-sys-api-mainTest1" doc:id="ace10384-6e70-479d-9dbf-faf6a8de8d7f" description="Test" expectedErrorType="APIKIT:NOT_FOUND">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="88ed9b63-1dfe-4f49-a476-2120b70c6557" processor="apikit:router">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="oms-customer-sys-api-config" attributeName="config-ref" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to oms-customer-sys-api-main" doc:id="288d0fd7-5285-4a29-a185-e2bb7b61e0bc" name="oms-customer-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<logger level="INFO" doc:name="Logger" doc:id="fc15444a-881d-428f-9864-9ddfab6d93e0" message="output #payload" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-oms-customer-sys-api-mainTest2" doc:id="fbeb5db6-1820-45ae-b296-580583930e03" description="Test" expectedErrorType="APIKIT:METHOD_NOT_ALLOWED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="d387f010-4cd0-4b98-aa92-abbc23e9d0ac" processor="apikit:router">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="oms-customer-sys-api-config" attributeName="config-ref" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to oms-customer-sys-api-main" doc:id="0824111f-29ec-43cf-93b7-f779567308da" name="oms-customer-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<logger level="INFO" doc:name="Logger" doc:id="2b11d782-9ee9-4c66-82e9-0d1dd36fbaad" message="output #payload" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-oms-customer-sys-api-mainTest3" doc:id="c492c5cd-e492-4a2d-ab57-92dced54ace5" description="Test" expectedErrorType="APIKIT:NOT_ACCEPTABLE">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="a03d2f84-283b-45aa-8f8b-c92b771d221f" processor="apikit:router">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="oms-customer-sys-api-config" attributeName="config-ref" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to oms-customer-sys-api-main" doc:id="10e4fab4-b5fd-4a52-a363-a755afe02fb7" name="oms-customer-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<logger level="INFO" doc:name="Logger" doc:id="2ca69711-f599-489a-9728-711948b1bb4e" message="output #payload" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-oms-customer-sys-api-mainTest4" doc:id="a4620bfa-df87-41e8-9817-519e1c358030" description="Test" expectedErrorType="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="41b7d6ee-bcca-4431-bd2d-d4bde035b92e" processor="apikit:router">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="oms-customer-sys-api-config" attributeName="config-ref" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to oms-customer-sys-api-main" doc:id="6360df4d-b286-4698-ad19-c7a0622c3254" name="oms-customer-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<logger level="INFO" doc:name="Logger" doc:id="4f28726a-d0a1-4e50-b7b7-79658e60c401" message="output #payload" />
+			</munit:validation>
+		</munit:test>
+	<munit:test name="customer-sys-interface-test-suite-oms-customer-sys-api-mainTest5" doc:id="503bfbb2-c67b-4559-b575-3c7aa8804eb1" description="Test" expectedErrorType="APIKIT:NOT_IMPLEMENTED">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Mock when" doc:id="1e258151-1829-4b1e-9064-579fd4a81f91" processor="apikit:router">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="oms-customer-sys-api-config" attributeName="config-ref" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<flow-ref doc:name="Flow-ref to oms-customer-sys-api-main" doc:id="f408eed7-22d0-4c61-b099-9bdc7c6e63f0" name="oms-customer-sys-api-main" />
+			</munit:execution>
+			<munit:validation>
+				<logger level="INFO" doc:name="Logger" doc:id="cf86781e-1615-4f63-8e07-34cbe5c19745" message="output #payload" />
+			</munit:validation>
+		</munit:test>
+
+
+</mule>

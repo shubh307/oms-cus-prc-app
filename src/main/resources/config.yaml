@@ -1,0 +1,16 @@
+db:
+ host: "remotemysql.com"
+ database: "q9OBAVZ264"
+ port: "3306"
+ 
+email:
+ user: "shubh.3799@gmail.com"
+ port: "587"
+ host: "smtp.gmail.com"
+
+http:
+ port: "8084"
+ host: "localhost"
+ 
+admin:
+ email: "dshubhanshu4@gmail.com"

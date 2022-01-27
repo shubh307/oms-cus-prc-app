@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    <apikit:config name="oms-customer-sys-api-config" api="resource::7ff1881d-d92a-436a-900e-450923acc45d:oms-customer-sys-api:1.0.4:raml:zip:oms-customer-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="oms-customer-sys-api-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/apiCusSys/*" doc:name="/apiCusSys/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="oms-customer-sys-api-config" />
+    </flow>
+    <flow name="delete:\sysCustomers\(customerId):oms-customer-sys-api-config">
+        <flow-ref doc:name="delete-customer-flow" doc:id="72d48797-3ffb-405e-a179-f25a910a754e" name="delete-customer-flow" />
+    </flow>
+    <flow name="patch:\sysCustomers\(customerId):application\json:oms-customer-sys-api-config">
+        <flow-ref doc:name="update-customer-flow" doc:id="9364ff3d-1ae6-4574-8338-a95486963480" name="update-customer-flow" />
+    </flow>
+    <flow name="get:\sysCustomers\(customerId):oms-customer-sys-api-config">
+        <flow-ref doc:name="select-customer-subflow" doc:id="12e828b7-9cf2-4796-8d33-4b19ecb98ec1" name="select-customer-subflow" />
+    </flow>
+    <flow name="post:\sysCustomers:application\json:oms-customer-sys-api-config">
+        <flow-ref doc:name="insert-customer-subflow" doc:id="d52fb8d6-34f7-4f0f-b2aa-71b6cdc39b77" name="insert-customer-subflow" />
+    </flow>
+    <flow name="post:\customerMail:oms-customer-sys-api-config">
+        <flow-ref doc:name="customer-details-email-flow" doc:id="e2a79438-438d-4def-a891-5461317a482d" name="customer-details-email-flow" />
+    </flow>
+    <flow name="post:\errorMail:oms-customer-sys-api-config">
+        <flow-ref doc:name="error-email-flow" doc:id="f7ccb52a-2c52-4b56-b256-049cdd654cb6" name="error-email-flow" />
+    </flow>
+    <flow name="post:\orderMail:oms-customer-sys-api-config">
+        <flow-ref doc:name="order-details-email-flow" doc:id="05465c48-4e3e-4556-847c-f04edc7523ea" name="order-details-email-flow" />
+    </flow>
+</mule>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<sub-flow name="delete-customer-flow" doc:id="07130466-8456-48ee-987a-df2436513a05" >
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="556c9f00-6240-4b1f-b5d4-d300d0052df2" millisBetweenRetries="2000">
+			<db:delete doc:name="delete-customer" doc:id="f96fedad-9e27-467f-95b0-8a7086a9be63" config-ref="Database_Config">
+			<error-mapping targetType="OMS:DATABASE_ERROR" />
+			<db:sql><![CDATA[DELETE FROM customerInfo WHERE customerId= :id]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	id: attributes.uriParams.customerId
+}]]]></db:input-parameters>
+		</db:delete>
+		</until-successful>
+		<ee:transform doc:name="DW Affected Rows" doc:id="fa8e6e38-2ea5-4e3c-8987-3b4038d03b7f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="update-customer-flow" doc:id="1f316ceb-7839-4d7e-b3fc-cf72f198cd42" >
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="9fa77da8-621d-450b-84bb-a16ec29ee698" millisBetweenRetries="2000">
+			<db:update doc:name="update-customer-details" doc:id="9c80dbbd-943c-4694-9749-007138dc3511" config-ref="Database_Config">
+			<error-mapping targetType="OMS:DATABASE_UNAVAILABLE" />
+			<db:sql><![CDATA[#[payload]]]></db:sql>
+		</db:update>
+		</until-successful>
+		<ee:transform doc:name="DW Affected Rows" doc:id="218fecd3-9ceb-4ea2-8553-a96054cce8c5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.affectedRows]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="insert-customer-subflow" doc:id="9149551c-8271-454e-b4cf-7678b19acbfc" >
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="c2baa809-ede8-4ae5-8e18-881b9d428d49" millisBetweenRetries="2000">
+			<db:insert doc:name="insert-customer-details" doc:id="37588be1-0cb3-4efc-9470-0b3018d4e712" config-ref="Database_Config">
+			<error-mapping sourceType="DB:QUERY_EXECUTION" targetType="OMS:CUSTOMER_ALREADY_EXISTS" />
+			<error-mapping targetType="OMS:DATABASE_UNAVAILABLE" />
+			<db:sql><![CDATA[INSERT INTO `customerInfo`(`customerId`, `firstName`, `lastName`, `email`, `age`, `streetAddress`, `city`, `state`, `postalCode`, `homeNumber`, `faxNumber`)
+VALUES (:ID, :FNAME, :LNAME, :EMAIL, :AGE, :STREET, :CITY, :STATE, :POSTAL, :NUMBER, :FAX)]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	ID: payload.customerId,
+	FNAME: payload.firstName,
+	LNAME: payload.lastName,
+	EMAIL: payload.email,
+	AGE: payload.age,
+	STREET: payload.address.streetAddress,
+	CITY: payload.address.city,
+	STATE: payload.address.state,
+	POSTAL: payload.address.postalCode,
+	NUMBER: payload.phoneNumber[0].number,
+    FAX: payload.phoneNumber[1].number
+}]]]></db:input-parameters>
+		</db:insert>
+		</until-successful>
+	</sub-flow>
+	<sub-flow name="select-customer-subflow" doc:id="12628bce-b3e8-434b-9bec-9b73a1778ae2" >
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="8c9739a4-0602-4e51-b354-3205dd5615c5" millisBetweenRetries="2000">
+			<db:select doc:name="select-customer-details" doc:id="c1aefbd2-88b9-4f7b-8e9c-579bd6284841" config-ref="Database_Config">
+			<error-mapping targetType="OMS:DATABASE_UNAVAILABLE" />
+			<db:sql><![CDATA[SELECT * FROM customerInfo WHERE customerId = :id]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	id: attributes.uriParams.customerId
+}]]]></db:input-parameters>
+		</db:select>
+		</until-successful>
+		<ee:transform doc:name="DW Payload" doc:id="6d7e367a-a9b5-4e95-9401-88af1f1f1dcf">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload[0]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<flow name="order-details-email-flow" doc:id="6d72c55c-02b7-4d8e-9459-bae1fbff33ef" >
+		<ee:transform doc:name="DW Map Emal Message" doc:id="2dccb520-b09e-49de-abfb-797faf0c39d6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml writeDeclaration = false
+---
+html: {
+head: {
+title: 'Notifier'
+},
+body: {
+	h3: "Hello " ++ attributes.headers.name as String ++ attributes.queryParams.message as String ++ ". Here are your Order Details:",
+table @( border: '3'): {
+	tr @(bgcolor: "#6C7AE0",style: "color: white !important; font-size:14px; "): {
+        //th: ["Error Field","Error Description",'Claim Id'],
+        th @() : "ORDER ID",
+        th @() : "CUSTOMER ID" ,
+        th @() : "PRODUCT NAME",
+        th @() : "QUANTITY",
+        th @() : "PRICE",
+        th @() : "TOTAL PRICE",
+        th @() : "ORDER STATUS",
+        th @() : "SHIPPING ADDRESS",
+        th @() : "BILLING ADDRESS"
+    },
+    tr: {
+        td @()  : attributes.headers.orderId,
+        td @()  : attributes.headers.customerId,
+        td @()  : attributes.headers.productName,
+        td @()  : attributes.headers.quantity,
+        td @()  : attributes.headers.price,
+        td @()  : attributes.headers.totalPrice,
+        td @()  : attributes.headers.orderStatus,
+        td @()  : payload.DeliveryAddress,
+        td @()  : payload.BillingAddress
+    }
+}
+}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="c787d36a-9947-4b6b-8ae7-dcd51356ea5a" millisBetweenRetries="1000">
+			<email:send doc:name="send-order-mail" doc:id="4621d38d-ee7f-46c0-8f25-7398499809f7" config-ref="Email_SMTP" fromAddress="${email.user}" subject='#["XYZ FURNITURES: " ++ attributes.queryParams.types as String]'>
+			<email:to-addresses>
+				<email:to-address value="#[attributes.queryParams.email]" />
+			</email:to-addresses>
+			<email:body contentType="text/html" encoding="UTF-8" />
+		</email:send>
+		</until-successful>
+	</flow>
+	<flow name="customer-details-email-flow" doc:id="36435d63-809f-45e1-a321-9138a77696a7" >
+		<ee:transform doc:name="DW Map Emal Message" doc:id="a6ecdc43-e57a-45ca-a127-22e4502ae7db" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml writeDeclaration = false
+---
+html: {
+head: {
+title: 'Notifier'
+},
+body: {
+	h3: "Hello " ++ attributes.headers.name as String ++ attributes.queryParams.message as String ++ ". Here are your Details:",
+table @( border: '3'): {
+	tr @(bgcolor: "#6C7AE0",style: "color: white !important; font-size:14px; "): {
+        //th: ["Error Field","Error Description",'Claim Id'],
+        th @() : "CUSTOMER ID" ,
+        th @() : "NAME",
+        th @() : "EMAIL",
+        th @() : "AGE",
+        th @() : "HOME NUMBER",
+        th @() : "FAX NUMBER",
+        th @() : "ADDRESS",
+    },
+    tr: {
+        td @()  : attributes.headers.customerId,
+        td @()  : attributes.headers.name,
+        td @()  : attributes.headers.email,
+        td @()  : attributes.headers.age,
+        td @()  : attributes.headers.homeNumber,
+        td @()  : attributes.headers.faxNumber,
+        td @()  : payload.address
+    }
+}
+}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="035be714-0555-453d-82a9-312297c6d516" millisBetweenRetries="1000">
+			<email:send doc:name="send-customer-mail" doc:id="1d936173-3418-4d56-b0cf-bb3411570043" config-ref="Email_SMTP" fromAddress="${email.user}" subject='#["XYZ FURNITURES: " ++ attributes.queryParams.types as String]'>
+			<email:to-addresses>
+				<email:to-address value="#[attributes.queryParams.email]" />
+			</email:to-addresses>
+			<email:body contentType="text/html" encoding="UTF-8" />
+		</email:send>
+		</until-successful>
+	</flow>
+	<flow name="error-email-flow" doc:id="c0561487-6a2a-4d06-9ae2-271760cd30b4" >
+		<ee:transform doc:name="DW Map Emal Message" doc:id="d7fd78ae-47ab-4384-840d-4c0cecb070ca" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml writeDeclaration = false
+---
+html: {
+head: {
+title: 'Notifier'
+},
+body: {
+	h3: "Hello, Please find below the error details.",
+table @( border: '3'): {
+	tr @(bgcolor: "#FF0000",style: "color: white !important; font-size:14px; "): {
+        //th: ["Error Field","Error Description",'Claim Id'],
+        th @() : "Error Status", //404
+        th @() : "Error Description" , //MESSAGE
+        th @() : "Action Item", //
+    },
+    tr: {
+        td @() : payload.errorField,
+        td @()  : payload.errorDescription,
+        td @()  : payload.actionItem
+    }
+}
+}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="468ca9f7-0a44-420f-adfe-ae5e3a914672" millisBetweenRetries="1000">
+			<email:send doc:name="send-error-mail" doc:id="e67fc63e-c2a8-45ee-a746-72dfd7caf87f" config-ref="Email_SMTP" subject='#["XYZ FURNITURES: " ++ attributes.queryParams.types as String]' fromAddress="${email.user}">
+			<email:to-addresses>
+				<email:to-address value="#[attributes.queryParams.email]" />
+					<email:to-address value="${admin.email}" />
+			</email:to-addresses>
+			<email:body contentType="text/html" encoding="UTF-8" />
+		</email:send>
+		</until-successful>
+	</flow>
+</mule>

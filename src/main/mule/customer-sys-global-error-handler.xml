@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="8efb06d7-98c7-411c-bdee-80cc00b899c7" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="72c3a31a-c38f-497c-a09f-c4e8a2b11689" file="config.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="b6d1a459-9e17-4483-8791-451cc6bd6b3b" file="secure-config.yaml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="22213530-7e16-4e35-924c-8a0fb2c4d6ed" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${secure::db.user}" password="${secure::db.password}" database="${db.database}" />
+	</db:config>
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="3d1ce1ea-36e8-4a17-b6bd-e3728daeed86" file="secure-config.yaml" key="ShubhApisero" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="d7ea7135-a8d3-4100-81c4-4ff5a40204b0" >
+		<email:smtp-connection host="${email.host}" port="${email.port}" user="${email.user}" password="${secure::email.password}" >
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="1a4bfca7-cab2-41eb-8be7-cd36390702e3" file="generic-error-handler.yaml" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="acced6c9-320f-4e8f-a996-83484b5c6644" >
+		<http:request-connection host="${http.host}" port="${http.port}" />
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="ceeeff18-f8d8-4171-b89a-e00fd0d0378e" defaultErrorHandler-ref="customer-sys-global-error-handlerError_Handler" />
+	<error-handler name="customer-sys-global-error-handlerError_Handler" doc:id="bd96bc36-4d5a-40a6-9306-fa4bc2b6db5e" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue OMS:CUSTOMER_ALREADY_EXISTS" doc:id="d4bbc1a6-9fd9-4568-986c-90e7380c7f70" type="OMS:CUSTOMER_ALREADY_EXISTS">
+			<set-variable value="404" doc:name="SET httpStatus" doc:id="f8af7eff-9e39-4a48-8490-22ff93117b97" variableName="httpStatus" />
+			<set-variable value="OMS:CUSTOMER_ALREADY_EXISTS" doc:name="SET errorDesciption" doc:id="10e1163a-b1cc-490d-b454-e7a4b1a28d96" variableName="errorDesciption" />
+			<ee:transform doc:name="DW Error Message" doc:id="4743af55-56cd-46c3-8c80-905307c0d521" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "Customer Id already registered"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<http:request method="POST" doc:name="POST /apiCusSys/errorMail" doc:id="c1981aac-ae25-426e-9afc-cb44653290d3" config-ref="HTTP_Request_configuration" path="/apiCusSys/errorMail" target="mail">
+				<http:query-params><![CDATA[#[output application/java
+---
+{
+	types: "Error Message",
+	email : "shubh.307@gmail.com"
+}]]]></http:query-params>
+			</http:request>
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue OMS:DATABASE_ERROR" doc:id="367117c1-9146-40d6-a030-15126c6c2e63" type="OMS:DATABASE_ERROR">
+			<set-variable value="503" doc:name="SET httpStatus" doc:id="e37547ba-daa5-4286-9438-e68166b605c3" variableName="httpStatus" />
+			<set-variable value="OMS:DATABASE_ERROR" doc:name="SET errorDesciption" doc:id="4e3ed69c-dd03-41ea-90a3-0e89c6997414" variableName="errorDesciption" />
+			<ee:transform doc:name="DW Error Message" doc:id="8bc0f1e6-dfc4-4ccb-a3ce-f64faf33b243" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDesciption,
+	actionItem: "Error With Database Connectivity"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+			<http:request method="POST" doc:name="POST /apiCusSys/errorMail" doc:id="a089d96a-54a8-4b59-bb18-3a69632bc5bf" config-ref="HTTP_Request_configuration" path="/apiCusSys/errorMail" target="mail">
+				<http:query-params><![CDATA[#[output application/java
+---
+{
+	types: "Error Message",
+	email : "shubh.307@gmail.com"
+}]]]></http:query-params>
+			</http:request>
+		</on-error-continue>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate APIKIT:BAD_REQUEST" doc:id="51a76454-dff7-47fa-a83d-84027ab5c2a9" type="APIKIT:BAD_REQUEST" >
+			<set-variable value="${errorCodeMessage.badRequest.code}" doc:name="SET httpStatus" doc:id="effeed50-8781-47b7-9d42-0e03c0aec6d6" variableName="httpStatus" />
+			<set-variable value="${errorCodeMessage.badRequest.description}" doc:name="SET errorDescription" doc:id="0412f058-f90b-465a-803a-1dd17fe987fc" variableName="errorDescription" />
+			<ee:transform doc:name="DW Error Message" doc:id="0d7fd14a-982e-4415-9e23-c52abe24f322" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "Please Check the attributes and body"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate APIKIT:NOT_FOUND" doc:id="ec709d96-fd3d-4a31-af49-9400d9d98900" type="APIKIT:NOT_FOUND" >
+			<set-variable value="${errorCodeMessage.notFound.code}" doc:name="SET httpStatus" doc:id="5d2dc0ab-5d8c-4a48-a0a7-21f8efd07a76" variableName="httpStatus" />
+			<set-variable value="${errorCodeMessage.notFound.description}" doc:name="SET errorDescription" doc:id="7714a659-a3fc-4b74-b44c-0bd3912aedb3" variableName="errorDescription" />
+			<ee:transform doc:name="DW Error Message" doc:id="dd4bf6c8-42e9-4d77-a764-ff376cbb3825" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "Please Check the URI and other attributes"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate APIKIT:METHOD_NOT_ALLOWED" doc:id="8828fe26-3432-44db-8fbf-3b0e2c069dc8" type="APIKIT:METHOD_NOT_ALLOWED" >
+			<set-variable value="${errorCodeMessage.methodNotAllowed.code}" doc:name="SET httpStatus" doc:id="0ea169fe-d7ef-4e53-a0b6-3298f7bcd14d" variableName="httpStatus" />
+			<set-variable value="${errorCodeMessage.methodNotAllowed.description}" doc:name="SET errorDescription" doc:id="c13ddc6b-904e-4b34-be0a-e2d2fc19759e" variableName="errorDescription" />
+			<ee:transform doc:name="DW Error Message" doc:id="a34a7c24-d431-4632-ba64-401a1891b5f3" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "Please use the valid method for the process"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate APIKIT:NOT_ACCEPTABLE" doc:id="e7d3a805-d50f-4a92-a508-0410d1f2f6ce" type="APIKIT:NOT_ACCEPTABLE" >
+			<set-variable value="${errorCodeMessage.notAcceptable.code}" doc:name="SET httpStatus" doc:id="304e7cbd-e051-4edb-832e-f581dc3779e0" variableName="httpStatus" />
+			<set-variable value="${errorCodeMessage.notAcceptable.description}" doc:name="SET errorDescription" doc:id="ec572e03-3129-4495-b049-afc8ab9f5856" variableName="errorDescription" />
+			<ee:transform doc:name="DW Error Message" doc:id="eabf17ea-b86a-4073-89b7-14f85c85f144" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	eerrorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "Please Check the body. You may be trying to update or insert invalid/uneditable data"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error PropagateAPIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="8c5dac76-b3e7-47a4-8412-4eec587869fb" type="APIKIT:UNSUPPORTED_MEDIA_TYPE" >
+			<set-variable value="${errorCodeMessage.unsupportedMediaType.code}" doc:name="SET httpStatus" doc:id="8cb9b3e5-efef-4b55-84b7-e37dffa0928f" variableName="httpStatus" />
+			<set-variable value="${errorCodeMessage.unsupportedMediaType.description}" doc:name="SET errorDescription" doc:id="dca20278-9fc4-4c57-a886-98ac23d91591" variableName="errorDescription" />
+			<ee:transform doc:name="DW Error Message" doc:id="b8a097d6-f4ae-4796-8fa3-33c38a63cb00" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "Please provide valid media type in body"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate APIKIT:NOT_IMPLEMENTED" doc:id="8b208fa2-361f-4c84-9a23-91097a3c6387" type="APIKIT:NOT_IMPLEMENTED" >
+			<set-variable value="${errorCodeMessage.notImplemented.code}" doc:name="SET httpStatus" doc:id="ed41bec7-13f1-4328-9ac4-f9cddab8097e" variableName="httpStatus" />
+			<set-variable value="${errorCodeMessage.notImplemented.description}" doc:name="SET errorDescription" doc:id="c88f0112-ecef-405c-80f7-904b0161771b" variableName="errorDescription" />
+			<ee:transform doc:name="DW Error Message" doc:id="9aa030c7-01a2-4796-a010-8add8ce5cf58" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorField: vars.httpStatus,
+	errorDescription: vars.errorDescription,
+	actionItem: "The server does not support the functionality required to fulfill the request"
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables />
+			</ee:transform>
+		</on-error-propagate>
+	</error-handler>
+</mule>
